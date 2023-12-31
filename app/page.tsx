@@ -3,21 +3,17 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
-
-type Todo = {
-  id: number;
-  title: string;
-};
+import { Todo } from "@/types";
+import { getTodos } from "./action";
 
 export default function Page() {
   const fetchTodos = async ({ pageParam }: { pageParam: number }) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    const res = await fetch(`https://jsonplaceholder.typicode.com/todos?_page=${pageParam}`);
-    console.log("fetchTodos");
-    return res.json();
+    const res = await getTodos(pageParam);
+    return res;
   };
 
-  const { data, fetchNextPage, isFetchingNextPage, hasNextPage } = useInfiniteQuery({
+  const { data, fetchNextPage, isFetching, isFetchingNextPage, hasNextPage } = useInfiniteQuery({
     queryKey: ["todos"],
     queryFn: fetchTodos,
     initialPageParam: 1,
@@ -66,6 +62,12 @@ export default function Page() {
       {isFetchingNextPage && (
         <section className="mt-8">
           <Loader2 className="animate-spin" />
+        </section>
+      )}
+
+      {!hasNextPage && !isFetching && (
+        <section className="mt-8">
+          <p>no more</p>
         </section>
       )}
     </main>
